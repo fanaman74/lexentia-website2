@@ -54,7 +54,8 @@ button { cursor: pointer; }
 .button { display: inline-flex; align-items: center; gap: 1rem; padding: .8rem 1.15rem; border: 1px solid transparent; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
 .button-light { background: #fff; color: var(--ink); }
 .button-light:hover { background: #d9ebdf; }
-.button-outline-light { border-color: currentColor; color: #fff; }
+.button-outline-light { border-color: currentColor; background: transparent; color: #fff; }
+.button-outline-light:hover { background: rgba(255,255,255,.1); }
 .text-link { display: inline-flex; align-items: center; gap: .6rem; padding-bottom: .25rem; border-bottom: 1px solid currentColor; font-size: .8rem; letter-spacing: 0; text-transform: none; }
 .text-link.dark { color: var(--ink); }
 .text-link:hover { color: #1c6b4f; }
@@ -162,6 +163,7 @@ button { cursor: pointer; }
 .contact-handoff { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.2); }
 .contact-handoff p { margin: 0 0 1rem; font-size: .82rem; }
 .contact-handoff-actions { display: flex; gap: .7rem; flex-wrap: wrap; }
+.contact-actions { margin-top: 3rem; }
 .contact-details { display: flex; justify-content: space-between; max-width: 680px; margin: 4rem auto 0; padding-top: 1.2rem; border-top: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.68); font-size: .75rem; text-align: left; }
 .site-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 2rem var(--gutter); border-top: 1px solid #e5e8e4; background: var(--white); color: #222; font-size: .68rem; letter-spacing: .06em; }
 .site-footer p { margin: 0; color: #737872; }
