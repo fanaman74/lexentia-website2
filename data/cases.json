@@ -1,0 +1,67 @@
+{
+  "retrievedAt": "2026-10-15T08:41:08.031Z",
+  "sourceUrl": "https://publications.europa.eu/webapi/rdf/sparql",
+  "listingUrl": "https://eur-lex.europa.eu/search.html?DTS_DOM=EU_LAW&DTS_SUBDOM=EU_CASE_LAW&type=advanced&lang=en&CT_CASELAW_1_CODED=STAT&sortOne=DD&sortOneOrder=desc",
+  "cases": [
+    {
+      "celex": "62025TJ0506",
+      "caseNumber": "T-506/25",
+      "court": "General Court",
+      "title": "GY v European Commission.",
+      "sourceTitle": "Judgment of the General Court (Tenth Chamber) of 14 October 2026.#GY v European Commission.#Civil service – Members of the temporary staff – Remuneration – Family allowances – Household allowance – Dependent child allowance – Education allowance – Conditions for granting – Withdrawal of entitlement to the allowance – Recovery of overpayments – Article 85 of the Staff Regulations – Manifest error of assessment – Right to receive social security benefits and social advantages – Article 34 of the Charter of Fundamental Rights – Principle of good administration – Duty of care – Legal certainty – Misuse of powers.#Case T-506/25.",
+      "judgmentDate": "2026-10-14",
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62025TJ0506",
+      "recordUrl": null,
+      "summary": "Civil service – Members of the temporary staff – Remuneration – Family allowances",
+      "category": "Civil service"
+    },
+    {
+      "celex": "62024TJ0537",
+      "caseNumber": "T-537/24",
+      "court": "General Court",
+      "title": "GC v Single Resolution Board.",
+      "sourceTitle": "Judgment of the General Court (Tenth Chamber) of 14 October 2026.#GC v Single Resolution Board.#Civil service – Staff of the SRB – Members of the temporary staff – Probationary period – Internal reorganisation of the SRB’s services – Dismissal decision at the end of the probationary period – Manifest error of assessment – Liability.#Case T-537/24.",
+      "judgmentDate": "2026-10-14",
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62024TJ0537",
+      "recordUrl": null,
+      "summary": "Civil service – Staff of the SRB – Members of the temporary staff – Probationary period",
+      "category": "Civil service"
+    },
+    {
+      "celex": "62023CJ0706",
+      "caseNumber": "C-706/23",
+      "court": "Court of Justice",
+      "title": "Şcoala gimnazială « Mihai Eminescu » Vaslui v Uniunea Sindicală « Didactica » Vaslui au nom et pour ses membres and Others.",
+      "sourceTitle": "Judgment of the Court (First Chamber) of 8 October 2026.#Şcoala gimnazială « Mihai Eminescu » Vaslui v Uniunea Sindicală « Didactica » Vaslui au nom et pour ses membres and Others.#Request for a preliminary ruling from the Curtea de Apel Iaşi.#Reference for a preliminary ruling – Social policy – Directive 2003/88/EC – Right to paid annual leave – Article 7(1) – Article 31(2) of the Charter of Fundamental Rights of the European Union – Framework agreement on part-time work concluded by UNICE, CEEP and the ETUC – Clause 4.1 – Framework agreement on fixed-term work concluded by ETUC, UNICE and CEEP – Clause 4.1 – Principle of non-discrimination – Principle pro rata temporis – Accumulation of separate contracts of employment – Teaching staff hired on the basis of a full-time employment contract of indefinite duration and a part-time fixed-term employment contract – Remuneration payable in respect of paid annual leave calculated solely on the basis of the full-time employment contract of indefinite duration – Meal allowance granted solely in relation to the actual working time completed in performing the full-time employment contract of indefinite duration.#Case C-706/23.",
+      "judgmentDate": "2026-10-08",
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62023CJ0706",
+      "recordUrl": null,
+      "summary": "Reference for a preliminary ruling – Social policy – Directive 2003/88/EC – Right to paid annual leave",
+      "category": "Civil service"
+    },
+    {
+      "celex": "62025TJ0084",
+      "caseNumber": "T-84/25",
+      "court": "General Court",
+      "title": "HP v European Commission.",
+      "sourceTitle": "Judgment of the General Court (Third Chamber) of 30 September 2026.#HP v European Commission.#Civil service – Officials – Certification – 2022-2023 certification exercise – Non-inclusion on the final list of officials authorised to take part in the training programme – Article 45a of the Staff Regulations – Obligation to state reasons – Right to be heard – General provisions for implementing Article 45a of the Staff Regulations – Legal certainty – Equal treatment – Duty of care – Principle of good administration – Plea of illegality – Liability.#Case T-84/25.",
+      "judgmentDate": "2026-09-30",
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62025TJ0084",
+      "recordUrl": null,
+      "summary": "Civil service – Officials – Certification – 2022-2023 certification exercise",
+      "category": "Civil service"
+    },
+    {
+      "celex": "62025CJ0369",
+      "caseNumber": "C-369/25",
+      "court": "Court of Justice",
+      "title": "LW v Trenitalia SpA and Istituto nazionale della previdenza sociale (INPS).",
+      "sourceTitle": "Judgment of the Court (Fifth Chamber) of 24 September 2026.#LW v Trenitalia SpA and Istituto nazionale della previdenza sociale (INPS).#Request for a preliminary ruling from the Tribunale di Napoli.#Reference for a preliminary ruling – Social policy – Employer’s obligation to inform employees of the conditions applicable to the contract or employment relationship – Directive 91/533/EEC – Article 8(1) – Defence of rights – Scope of that provision – Protection of the rights conferred by that directive – Article 3 – Right of the employee to receive a document containing information on the essential elements of the contract or employment relationship.#Case C-369/25.",
+      "judgmentDate": "2026-09-24",
+      "officialUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62025CJ0369",
+      "recordUrl": null,
+      "summary": "Reference for a preliminary ruling – Social policy – Employer’s obligation to inform employees of the conditions applicable to the contract or employment relationship – Directive 91/533/EEC",
+      "category": "Civil service"
+    }
+  ]
+}

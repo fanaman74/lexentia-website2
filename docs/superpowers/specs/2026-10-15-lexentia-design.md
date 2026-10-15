@@ -2,6 +2,20 @@
 
 Status: approved by the user on 15 October 2026.
 
+## User-directed visual correction — 15 October 2026
+
+Further user refinements: logo top left, primary navigation centred, language/contact at right; carousel auto-advances with readable untruncated titles/descriptions for all slides; repeatable section reveals when scrolling in either direction; lower the intro text link and standardise link treatments. Remove the coordinate/scroll instruction line completely. Auto-advance should pause for hover, keyboard focus, hidden tabs, reduced motion and an explicit pause control.
+
+Later refinements also supersede the original scope below: lower the Insights archive link with the same 36px section-link gap; show five latest relevant official court records and link to a relevant EUR-Lex results page. Visible case links use EUR-Lex. Add the enquiry form and retain the existing WordPress Contact Form 7/reCAPTCHA delivery. Private previews clearly hand drafts off to the existing official form; canonical-domain submission depends on preserving that WordPress endpoint.
+
+The user rejected the first visual implementation. This section supersedes the visual system and carousel descriptions below. Preserve the content and functional requirements.
+
+- Reproduce Moonlit's scroll interaction: full-width playing video with centered sans-serif text; pinned hero during scroll; video shrinks and moves to the right with subtle perspective; initial heading fades; new heading and body appear on the left; then normal page scrolling resumes. Reverse naturally when scrolling upward. Use native document scrolling, with no wheel-event capture. Provide a skip control, mobile stacked alternative and reduced-motion static alternative.
+- Match Legora's minimal UI: almost-white, black regular sans-serif, modest section headings around 40px, clean whitespace and restrained forest-green actions. Remove the large serif and italic treatment, gold/clay accents, numbered editorial section labels and repeated decorative rules.
+- Rebuild the practice carousel as a translating centered track, not an accordion. Desktop reference: selected image approximately 337 × 454px, neighbours approximately 182 × 228px, top aligned, around 58px gaps, clipped partial slides at the edges. Small white titles near the top centre of images. Active description sits beneath its image on white. Arrows above at opposing edges, small centered progress indicator. Preserve keyboard, touch, focus and accessible state.
+- Remove `office.jpg` from office-room representations: the downloaded image depicts a place setting with Lexentia stationery, not a meeting room. Use accurate alternative text for all retained photographs.
+- Recheck the revised site in the browser at hero start, middle and end, then desktop/mobile carousel and body sections.
+
 ## Goal and audience
 
 Build a polished replacement website for https://www.lexentia.eu/ for prospective clients of the Brussels law firm. Preserve its focus on EU and international civil service law and Belgian/international business and private law. The result must feel appropriate to a specialist law firm, with working navigation, content browsing and contact actions.

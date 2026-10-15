@@ -1,0 +1,20 @@
+{
+  "name": "Lexentia",
+  "tagline": { "en": "European law, carefully argued.", "fr": "Le droit européen, avec précision." },
+  "intro": { "en": "A Brussels practice focused on EU and international civil service law, alongside Belgian and international business law.", "fr": "Une pratique bruxelloise dédiée au droit de la fonction publique européenne et internationale, ainsi qu'au droit belge et international des affaires." },
+  "address": "Eugène Plasky Square 92–94/001, 1030 Brussels",
+  "phone": "+32 (0) 2 319 70 53",
+  "email": "contact@lexentia.eu",
+  "hours": { "en": "Monday–Friday, 8:30–17:00", "fr": "Du lundi au vendredi, de 8h30 à 17h00" },
+  "sourceUrl": "https://www.lexentia.eu/en/",
+  "team": [
+    { "name": "Nathalie de Montigny", "role": { "en": "Founding partner · EU & international civil service law", "fr": "Associée fondatrice · droit de la fonction publique européenne et internationale" }, "bio": { "en": "Nathalie built Lexentia around a human-scale practice: responsive, rigorous and grounded in dialogue.", "fr": "Nathalie a construit Lexentia autour d'une pratique à taille humaine : réactive, rigoureuse et fondée sur le dialogue." }, "image": "assets/nathalie.jpg", "sourceUrl": "https://www.lexentia.eu/en/attorneys/nathalie-de-montigny/" },
+    { "name": "Magali Mattar", "role": { "en": "Attorney", "fr": "Avocate" }, "bio": { "en": "Magali contributes to the firm's focused, personal approach to client work.", "fr": "Magali contribue à l'approche ciblée et personnelle de l'accompagnement des clients." }, "image": "assets/magali.svg", "sourceUrl": "https://www.lexentia.eu/attorneys/alissa-everaets/" }
+  ],
+  "practices": [
+    { "id": "civil-service", "title": { "en": "EU civil service law", "fr": "Droit de la fonction publique européenne" }, "text": { "en": "Advice and representation for officials, agents and institutions across the life of an EU career.", "fr": "Conseil et représentation des fonctionnaires, agents et institutions tout au long d'une carrière européenne." }, "image": "assets/stock/brussels-facade.jpg" },
+    { "id": "litigation", "title": { "en": "European litigation", "fr": "Contentieux européen" }, "text": { "en": "A precise route through administrative decisions, staff disputes and proceedings before the EU courts.", "fr": "Une voie précise dans les décisions administratives, les litiges du personnel et les procédures devant les juridictions de l'Union." }, "image": "assets/stock/brussels-townhall.jpg" },
+    { "id": "business", "title": { "en": "Business & economic law", "fr": "Droit des affaires et droit économique" }, "text": { "en": "Practical counsel for Belgian and international businesses, from contracts to restructuring.", "fr": "Un accompagnement concret des entreprises belges et internationales, des contrats à la réorganisation." }, "image": "assets/stock/brussels-tower.jpg" },
+    { "id": "private", "title": { "en": "Private law", "fr": "Droit privé" }, "text": { "en": "Clear advice for the obligations and relationships that hold a professional life together.", "fr": "Un conseil clair pour les obligations et les relations qui structurent la vie professionnelle." }, "image": "assets/stock/brussels-palace.jpg" }
+  ]
+}

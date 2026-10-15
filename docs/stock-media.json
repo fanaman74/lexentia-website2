@@ -1,0 +1,36 @@
+{
+  "verifiedOn": "2026-10-15",
+  "assets": [
+    {
+      "files": ["public/assets/stock/brussels-tower.jpg"],
+      "creator": "Bernardo Lorena Ponte (@pontebernardo)",
+      "source": "https://unsplash.com/photos/tall-modern-building-with-many-windows-against-a-blue-sky-TdanM0YZqQw/",
+      "license": "https://unsplash.com/license/"
+    },
+    {
+      "files": ["public/assets/stock/hero.mp4", "public/assets/stock/hero-poster.jpg"],
+      "creator": "cottonbro studio",
+      "source": "https://www.pexels.com/video/people-in-a-business-meeting-passing-a-piece-of-document-3202049/",
+      "license": "https://www.pexels.com/license/",
+      "download": "https://videos.pexels.com/video-files/3202049/3202049-hd_1920_1080_25fps.mp4"
+    },
+    {
+      "files": ["public/assets/stock/brussels-facade.jpg"],
+      "creator": "Nick Wessaert (@fusebrussels); page caption: Picture by OOgilles",
+      "source": "https://unsplash.com/photos/a-honeycomb-pattern-in-the-modern-facade-of-a-building-in-brussels-QeJuMpjCHQk",
+      "license": "https://unsplash.com/license/"
+    },
+    {
+      "files": ["public/assets/stock/brussels-palace.jpg"],
+      "creator": "Vinicius Brasil (@vinib)",
+      "source": "https://unsplash.com/photos/grand-building-entrance-framed-by-bare-trees-and-a-pathway-s6Yl9gq9iZo",
+      "license": "https://unsplash.com/license/"
+    },
+    {
+      "files": ["public/assets/stock/brussels-townhall.jpg"],
+      "creator": "Tom S. (@tom11ca)",
+      "source": "https://unsplash.com/photos/a-tall-building-with-a-clock-on-the-front-of-it-7k6AzQC3nyg",
+      "license": "https://unsplash.com/license/"
+    }
+  ]
+}
