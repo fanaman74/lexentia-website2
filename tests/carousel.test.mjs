@@ -9,7 +9,7 @@ test('carousel autoplay only runs when the page and control are available', () =
   }
 });
 
-test('case carousel clamps manual endpoints and wraps autoplay', () => {
+test('practice carousel clamps manual endpoints and wraps autoplay', () => {
   assert.equal(nextCarouselIndex(0, 5, -1), 0);
   assert.equal(nextCarouselIndex(4, 5, 1), 4);
   assert.equal(nextCarouselIndex(4, 5, 1, true), 0);
