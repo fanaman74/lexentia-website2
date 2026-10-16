@@ -15,9 +15,11 @@ const translations = {
 translations.en['hero.leftTitle'] = 'A focused practice<br>for complex questions.';
 translations.en['hero.leftCopy'] = 'Advice that stays close to the facts, the institution and the person at the centre of the matter.';
 translations.en['hero.skip'] = 'Skip intro ↓';
+translations.en['practice.cta'] = 'Start a conversation';
 translations.fr['hero.leftTitle'] = 'Une pratique ciblée<br>pour les questions complexes.';
 translations.fr['hero.leftCopy'] = 'Un conseil proche des faits, de l’institution et de la personne au centre du dossier.';
 translations.fr['hero.skip'] = 'Passer l’introduction ↓';
+translations.fr['practice.cta'] = 'Entamer une conversation';
 
 Object.assign(translations.en, {
   'contact.formTitle': 'Send an enquiry', 'contact.formIntro': 'Share the outline of your question. Your message will be delivered through Lexentia’s existing secure form.', 'contact.formIntroPreview': 'Prepare a draft here, then continue on Lexentia’s secure form. This preview does not send enquiries.', 'contact.name': 'Name', 'contact.email': 'Email', 'contact.message': 'Message', 'contact.namePlaceholder': 'Your name', 'contact.emailPlaceholder': 'you@example.com', 'contact.messagePlaceholder': 'How can we help?', 'contact.consent': 'I agree that Lexentia may use these details to respond to my enquiry. See the <a href="https://www.lexentia.eu/en/legal-notice/" target="_blank" rel="noopener">legal notice</a>.', 'contact.send': 'Send enquiry', 'contact.continue': 'Continue on Lexentia’s secure form ↗', 'contact.sending': 'Sending…', 'contact.sent': 'Your enquiry was sent to Lexentia.', 'contact.validation': 'Please complete the required fields before continuing.', 'contact.error': 'We could not send this enquiry. Your entries are still here; please try again.', 'contact.spam': 'The secure form could not accept this enquiry. Your entries are still here; please try again.', 'contact.previewNotice': 'Preview handoff: this message has not been sent. Copy your draft, then continue on Lexentia’s secure form.', 'contact.copy': 'Copy enquiry draft', 'contact.copied': 'Draft copied. Continue on Lexentia’s secure form.', 'contact.openOfficial': 'Continue on Lexentia’s secure form ↗', 'contact.technical': 'The secure form is temporarily unavailable. Please continue on Lexentia’s official form.'
@@ -55,23 +57,20 @@ function updateLanguage() {
 }
 function renderPractices() {
   const track = $('#practice-track'); if (!track || !state.firm) return;
-  if (track.children.length !== state.firm.practices.length) {
-    track.replaceChildren(...state.firm.practices.map((item, index) => {
-      const card = document.createElement('article'); card.className = 'practice-card'; card.dataset.practice = index; card.tabIndex = 0; card.setAttribute('role', 'button');
-      const image = document.createElement('img'); image.loading = 'lazy'; image.alt = ''; image.src = safeAsset(item.image); card.append(image);
-      const label = document.createElement('span'); label.className = 'practice-card-number'; label.textContent = `0${index + 1}`; card.append(label); const content = document.createElement('div'); content.className = 'practice-card-content'; const title = document.createElement('h3'); const text = document.createElement('p'); content.append(title, text); card.append(content);
-      card.addEventListener('click', () => selectPractice(index)); card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectPractice(index, { focus: true }); } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); selectPractice(index + 1, { focus: true }); } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); selectPractice(index - 1, { focus: true }); } }); return card;
-    }));
-  }
-  [...track.children].forEach((card, index) => { const item = state.firm.practices[index]; card.classList.toggle('is-active', index === state.practiceIndex); card.setAttribute('aria-pressed', String(index === state.practiceIndex)); card.setAttribute('aria-label', item.title[state.lang]); card.querySelector('h3').textContent = item.title[state.lang]; card.querySelector('p').textContent = item.text[state.lang]; });
-  $('#practice-index').textContent = String(state.practiceIndex + 1).padStart(2, '0'); $('#practice-total').textContent = String(state.firm.practices.length).padStart(2, '0'); requestAnimationFrame(positionPracticeTrack);
+  const item = state.firm.practices[state.practiceIndex];
+  const card = document.createElement('article'); card.className = 'practice-card is-active'; card.setAttribute('aria-live', 'polite');
+  const label = document.createElement('span'); label.className = 'practice-card-number'; label.textContent = `${String(state.practiceIndex + 1).padStart(2, '0')} / ${String(state.firm.practices.length).padStart(2, '0')}`;
+  const title = document.createElement('h3'); title.textContent = item.title[state.lang];
+  const text = document.createElement('p'); text.textContent = item.text[state.lang];
+  const cta = document.createElement('a'); cta.className = 'button practice-cta'; cta.href = '#contact'; cta.textContent = t('practice.cta'); const arrow = document.createElement('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '↗'; cta.append(arrow);
+  card.append(label, title, text, cta); track.replaceChildren(card);
+  $('#practice-index').textContent = String(state.practiceIndex + 1).padStart(2, '0'); $('#practice-total').textContent = String(state.firm.practices.length).padStart(2, '0');
 }
-function positionPracticeTrack() { const track = $('#practice-track'); const card = track?.children[state.practiceIndex]; if (!track || !card) return; const viewport = track.parentElement.clientWidth; const shift = viewport / 2 - (card.offsetLeft + card.offsetWidth / 2); track.style.setProperty('--practice-shift', `${shift}px`); }
 function stopPracticeTimer() { if (state.practiceTimer) { window.clearInterval(state.practiceTimer); state.practiceTimer = null; } }
 function practiceAutoplayShouldRun() { const carousel = $('.practice-carousel'); return Boolean(carousel && shouldAutoplay({ manualPause: state.practiceAutoplayPaused, documentHidden: document.hidden, reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches, hovering: carousel.matches(':hover'), focusWithin: carousel.matches(':focus-within') })); }
 function syncPracticeTimer() { stopPracticeTimer(); if (practiceAutoplayShouldRun()) state.practiceTimer = window.setInterval(() => selectPractice(state.practiceIndex + 1, { resetTimer: false }), 5000); }
 function setupPracticeAutoplay() { const carousel = $('.practice-carousel'); const toggle = $('.carousel-autoplay'); if (!carousel || !toggle) return; const sync = () => syncPracticeTimer(); carousel.addEventListener('mouseenter', sync); carousel.addEventListener('mouseleave', sync); carousel.addEventListener('focusin', sync); carousel.addEventListener('focusout', sync); document.addEventListener('visibilitychange', sync); const motion = window.matchMedia('(prefers-reduced-motion: reduce)'); motion.addEventListener?.('change', sync); toggle.addEventListener('click', () => { state.practiceAutoplayPaused = !state.practiceAutoplayPaused; toggle.classList.toggle('is-paused', state.practiceAutoplayPaused); toggle.setAttribute('aria-pressed', String(state.practiceAutoplayPaused)); toggle.setAttribute('aria-label', state.practiceAutoplayPaused ? t('carousel.play') : t('carousel.pause')); sync(); }); sync(); }
-function selectPractice(index, { focus = false, resetTimer = true } = {}) { if (!state.firm?.practices.length) return; state.practiceIndex = (index + state.firm.practices.length) % state.firm.practices.length; renderPractices(); const card = $('#practice-track')?.children[state.practiceIndex]; if (focus) card?.focus(); if (resetTimer) syncPracticeTimer(); }
+function selectPractice(index, { focus = false, resetTimer = true } = {}) { if (!state.firm?.practices.length) return; state.practiceIndex = (index + state.firm.practices.length) % state.firm.practices.length; renderPractices(); if (focus) $('#practice-track a')?.focus(); if (resetTimer) syncPracticeTimer(); }
 function setupReveals() { const targets = $$('main > section:not(.hero-sequence)'); if (!targets.length) return; document.documentElement.classList.add('js-reveal'); targets.forEach((target) => target.classList.add('reveal-target')); if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) { targets.forEach((target) => target.classList.add('is-visible')); return; } const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add('is-visible'); else if (entry.intersectionRatio === 0) entry.target.classList.remove('is-visible'); }), { threshold: [0, .15] }); targets.forEach((target) => observer.observe(target)); }
 function setContactStatus(message, kind = '', key = '') { const status = $('#contact-form-status'); if (!status) return; status.textContent = message; status.className = `form-status${kind ? ` is-${kind}` : ''}`; if (key) { status.dataset.statusKey = key; status.dataset.statusKind = kind; } }
 function isOfficialContactHost() { return ['lexentia.eu', 'www.lexentia.eu'].includes(window.location.hostname.toLowerCase()); }
@@ -128,7 +127,6 @@ function setupEvents() {
   setupPracticeAutoplay();
   setupReveals();
   setupContactForm();
-  window.addEventListener('resize', positionPracticeTrack);
 }
 async function init() {
   try { [state.firm, state.insights, state.cases] = await Promise.all([fetch('data/firm.json').then((r) => r.json()), fetch('data/insights.json').then((r) => r.json()), fetch('data/cases.json').then((r) => r.json()).then((snapshot) => { state.retrievedAt = snapshot.retrievedAt; state.caseListingUrl = safeCaseListingHref(snapshot.listingUrl); return sanitizeCases(snapshot.cases); })]); state.insights = state.insights.filter((item) => safeHref(item.sourceUrl, ['www.lexentia.eu']) !== '#'); populateFilters(); setupEvents(); updateLanguage(); } catch (error) { console.error('Lexentia content could not load', error); }
