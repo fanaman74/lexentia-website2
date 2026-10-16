@@ -1,10 +1,10 @@
 import { filterRecords, uniqueValues } from './lib/filter.mjs';
 import { escapeHtml, safeHttpsUrl } from './lib/sanitize.mjs';
 import { getHeroGeometry, getHeroProgress } from './lib/hero-progress.mjs';
-import { shouldAutoplay } from './lib/carousel.mjs';
+import { nextCarouselIndex, shouldAutoplay } from './lib/carousel.mjs';
 import { buildContactPayload, firstInvalidContactField, formatContactDraft, getContactConfig, isSuccessfulContactResponse, validateContactFields } from './lib/contact.mjs';
 
-const state = { lang: 'en', firm: null, insights: [], cases: [], retrievedAt: null, caseListingUrl: null, practiceIndex: 0, practiceTimer: null, practiceAutoplayPaused: false };
+const state = { lang: 'en', firm: null, insights: [], cases: [], retrievedAt: null, caseListingUrl: null, practiceIndex: 0, practiceTimer: null, practiceAutoplayPaused: false, caseIndex: 0, caseRailIndex: 0, caseTimer: null, caseResetTimer: null, caseAutoplayPaused: false };
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const translations = {
@@ -15,11 +15,30 @@ const translations = {
 translations.en['hero.leftTitle'] = 'A focused practice<br>for complex questions.';
 translations.en['hero.leftCopy'] = 'Advice that stays close to the facts, the institution and the person at the centre of the matter.';
 translations.en['hero.skip'] = 'Skip intro ↓';
-translations.en['practice.cta'] = 'Start a conversation';
 translations.fr['hero.leftTitle'] = 'Une pratique ciblée<br>pour les questions complexes.';
 translations.fr['hero.leftCopy'] = 'Un conseil proche des faits, de l’institution et de la personne au centre du dossier.';
 translations.fr['hero.skip'] = 'Passer l’introduction ↓';
-translations.fr['practice.cta'] = 'Entamer une conversation';
+
+translations.en['nav.cases'] = 'Latest News';
+translations.en['cases.title'] = 'Latest News';
+translations.en['cases.body'] = 'The latest Court of Justice and General Court rulings.';
+translations.en['cases.source'] = 'All latest news';
+translations.en['cases.explore'] = 'Explore this ruling';
+translations.en['snapshot.label'] = 'Last updated';
+translations.en['carousel.casePrev'] = 'Previous case';
+translations.en['carousel.caseNext'] = 'Next case';
+translations.en['carousel.casePause'] = 'Pause automatic case rotation';
+translations.en['carousel.casePlay'] = 'Play automatic case rotation';
+translations.fr['nav.cases'] = 'Dernières actualités';
+translations.fr['cases.title'] = 'Dernières actualités';
+translations.fr['cases.body'] = 'Les derniers arrêts de la Cour de justice et du Tribunal.';
+translations.fr['cases.source'] = 'Toutes les actualités récentes';
+translations.fr['cases.explore'] = 'Explorer cet arrêt';
+translations.fr['snapshot.label'] = 'Dernière mise à jour';
+translations.fr['carousel.casePrev'] = 'Affaire précédente';
+translations.fr['carousel.caseNext'] = 'Affaire suivante';
+translations.fr['carousel.casePause'] = 'Mettre en pause la rotation des affaires';
+translations.fr['carousel.casePlay'] = 'Lire la rotation des affaires';
 
 Object.assign(translations.en, {
   'contact.formTitle': 'Send an enquiry', 'contact.formIntro': 'Share the outline of your question. Your message will be delivered through Lexentia’s existing secure form.', 'contact.formIntroPreview': 'Prepare a draft here, then continue on Lexentia’s secure form. This preview does not send enquiries.', 'contact.name': 'Name', 'contact.email': 'Email', 'contact.message': 'Message', 'contact.namePlaceholder': 'Your name', 'contact.emailPlaceholder': 'you@example.com', 'contact.messagePlaceholder': 'How can we help?', 'contact.consent': 'I agree that Lexentia may use these details to respond to my enquiry. See the <a href="https://www.lexentia.eu/en/legal-notice/" target="_blank" rel="noopener">legal notice</a>.', 'contact.send': 'Send enquiry', 'contact.continue': 'Continue on Lexentia’s secure form ↗', 'contact.sending': 'Sending…', 'contact.sent': 'Your enquiry was sent to Lexentia.', 'contact.validation': 'Please complete the required fields before continuing.', 'contact.error': 'We could not send this enquiry. Your entries are still here; please try again.', 'contact.spam': 'The secure form could not accept this enquiry. Your entries are still here; please try again.', 'contact.previewNotice': 'Preview handoff: this message has not been sent. Copy your draft, then continue on Lexentia’s secure form.', 'contact.copy': 'Copy enquiry draft', 'contact.copied': 'Draft copied. Continue on Lexentia’s secure form.', 'contact.openOfficial': 'Continue on Lexentia’s secure form ↗', 'contact.technical': 'The secure form is temporarily unavailable. Please continue on Lexentia’s official form.'
@@ -48,6 +67,7 @@ function updateLanguage() {
   $$('[data-i18n-placeholder]').forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
   $('#insight-search')?.setAttribute('aria-label', t('filters.searchInsights')); $('#case-search')?.setAttribute('aria-label', t('filters.searchCases')); $('#insight-category')?.setAttribute('aria-label', t('filters.allCategories')); $('#case-court')?.setAttribute('aria-label', t('filters.allCourts'));
   $('[data-carousel="prev"]')?.setAttribute('aria-label', t('carousel.prev')); $('[data-carousel="next"]')?.setAttribute('aria-label', t('carousel.next'));
+  $('[data-case-carousel="prev"]')?.setAttribute('aria-label', t('carousel.casePrev')); $('[data-case-carousel="next"]')?.setAttribute('aria-label', t('carousel.caseNext')); const caseAutoplay = $('.case-autoplay'); if (caseAutoplay) caseAutoplay.setAttribute('aria-label', caseAutoplay.classList.contains('is-paused') ? t('carousel.casePlay') : t('carousel.casePause'));
   const autoplay = $('.carousel-autoplay'); if (autoplay) autoplay.setAttribute('aria-label', autoplay.classList.contains('is-paused') ? t('carousel.play') : t('carousel.pause'));
   const media = $('.media-control'); if (media) media.setAttribute('aria-label', media.classList.contains('is-paused') ? t('hero.play') : t('hero.pause'));
   $$('.lang-button').forEach((button) => button.classList.toggle('is-active', button.dataset.lang === state.lang));
@@ -57,20 +77,23 @@ function updateLanguage() {
 }
 function renderPractices() {
   const track = $('#practice-track'); if (!track || !state.firm) return;
-  const item = state.firm.practices[state.practiceIndex];
-  const card = document.createElement('article'); card.className = 'practice-card is-active'; card.setAttribute('aria-live', 'polite');
-  const label = document.createElement('span'); label.className = 'practice-card-number'; label.textContent = `${String(state.practiceIndex + 1).padStart(2, '0')} / ${String(state.firm.practices.length).padStart(2, '0')}`;
-  const title = document.createElement('h3'); title.textContent = item.title[state.lang];
-  const text = document.createElement('p'); text.textContent = item.text[state.lang];
-  const cta = document.createElement('a'); cta.className = 'button practice-cta'; cta.href = '#contact'; cta.textContent = t('practice.cta'); const arrow = document.createElement('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '↗'; cta.append(arrow);
-  card.append(label, title, text, cta); track.replaceChildren(card);
-  $('#practice-index').textContent = String(state.practiceIndex + 1).padStart(2, '0'); $('#practice-total').textContent = String(state.firm.practices.length).padStart(2, '0');
+  if (track.children.length !== state.firm.practices.length) {
+    track.replaceChildren(...state.firm.practices.map((item, index) => {
+      const card = document.createElement('article'); card.className = 'practice-card'; card.dataset.practice = index; card.tabIndex = 0; card.setAttribute('role', 'button');
+      const image = document.createElement('img'); image.loading = 'lazy'; image.alt = ''; image.src = safeAsset(item.image); card.append(image);
+      const label = document.createElement('span'); label.className = 'practice-card-number'; label.textContent = `0${index + 1}`; card.append(label); const content = document.createElement('div'); content.className = 'practice-card-content'; const title = document.createElement('h3'); const text = document.createElement('p'); content.append(title, text); card.append(content);
+      card.addEventListener('click', () => selectPractice(index)); card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectPractice(index, { focus: true }); } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); selectPractice(index + 1, { focus: true }); } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); selectPractice(index - 1, { focus: true }); } }); return card;
+    }));
+  }
+  [...track.children].forEach((card, index) => { const item = state.firm.practices[index]; card.classList.toggle('is-active', index === state.practiceIndex); card.setAttribute('aria-pressed', String(index === state.practiceIndex)); card.setAttribute('aria-label', item.title[state.lang]); card.querySelector('h3').textContent = item.title[state.lang]; card.querySelector('p').textContent = item.text[state.lang]; });
+  $('#practice-index').textContent = String(state.practiceIndex + 1).padStart(2, '0'); $('#practice-total').textContent = String(state.firm.practices.length).padStart(2, '0'); requestAnimationFrame(positionPracticeTrack);
 }
+function positionPracticeTrack() { const track = $('#practice-track'); const card = track?.children[state.practiceIndex]; if (!track || !card) return; const viewport = track.parentElement.clientWidth; const shift = viewport / 2 - (card.offsetLeft + card.offsetWidth / 2); track.style.setProperty('--practice-shift', `${shift}px`); const viewportRect = track.parentElement.getBoundingClientRect(); [...track.children].forEach((item) => { const rect = item.getBoundingClientRect(); item.classList.toggle('is-edge-clipped', rect.left < viewportRect.left - 1 || rect.right > viewportRect.right + 1); }); }
 function stopPracticeTimer() { if (state.practiceTimer) { window.clearInterval(state.practiceTimer); state.practiceTimer = null; } }
 function practiceAutoplayShouldRun() { const carousel = $('.practice-carousel'); return Boolean(carousel && shouldAutoplay({ manualPause: state.practiceAutoplayPaused, documentHidden: document.hidden, reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches, hovering: carousel.matches(':hover'), focusWithin: carousel.matches(':focus-within') })); }
 function syncPracticeTimer() { stopPracticeTimer(); if (practiceAutoplayShouldRun()) state.practiceTimer = window.setInterval(() => selectPractice(state.practiceIndex + 1, { resetTimer: false }), 5000); }
 function setupPracticeAutoplay() { const carousel = $('.practice-carousel'); const toggle = $('.carousel-autoplay'); if (!carousel || !toggle) return; const sync = () => syncPracticeTimer(); carousel.addEventListener('mouseenter', sync); carousel.addEventListener('mouseleave', sync); carousel.addEventListener('focusin', sync); carousel.addEventListener('focusout', sync); document.addEventListener('visibilitychange', sync); const motion = window.matchMedia('(prefers-reduced-motion: reduce)'); motion.addEventListener?.('change', sync); toggle.addEventListener('click', () => { state.practiceAutoplayPaused = !state.practiceAutoplayPaused; toggle.classList.toggle('is-paused', state.practiceAutoplayPaused); toggle.setAttribute('aria-pressed', String(state.practiceAutoplayPaused)); toggle.setAttribute('aria-label', state.practiceAutoplayPaused ? t('carousel.play') : t('carousel.pause')); sync(); }); sync(); }
-function selectPractice(index, { focus = false, resetTimer = true } = {}) { if (!state.firm?.practices.length) return; state.practiceIndex = (index + state.firm.practices.length) % state.firm.practices.length; renderPractices(); if (focus) $('#practice-track a')?.focus(); if (resetTimer) syncPracticeTimer(); }
+function selectPractice(index, { focus = false, resetTimer = true } = {}) { if (!state.firm?.practices.length) return; state.practiceIndex = (index + state.firm.practices.length) % state.firm.practices.length; renderPractices(); const card = $('#practice-track')?.children[state.practiceIndex]; if (focus) card?.focus(); if (resetTimer) syncPracticeTimer(); }
 function setupReveals() { const targets = $$('main > section:not(.hero-sequence)'); if (!targets.length) return; document.documentElement.classList.add('js-reveal'); targets.forEach((target) => target.classList.add('reveal-target')); if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) { targets.forEach((target) => target.classList.add('is-visible')); return; } const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add('is-visible'); else if (entry.intersectionRatio === 0) entry.target.classList.remove('is-visible'); }), { threshold: [0, .15] }); targets.forEach((target) => observer.observe(target)); }
 function setContactStatus(message, kind = '', key = '') { const status = $('#contact-form-status'); if (!status) return; status.textContent = message; status.className = `form-status${kind ? ` is-${kind}` : ''}`; if (key) { status.dataset.statusKey = key; status.dataset.statusKind = kind; } }
 function isOfficialContactHost() { return ['lexentia.eu', 'www.lexentia.eu'].includes(window.location.hostname.toLowerCase()); }
@@ -104,11 +127,63 @@ function renderTeam() { const target = $('#team-grid'); if (!target || !state.fi
 function renderInsights() {
   const list = $('#insights-list'); if (!list) return; const records = filterRecords(state.insights, { query: $('#insight-search')?.value, category: $('#insight-category')?.value });
   list.innerHTML = records.map((item) => `<article class="insight-item"><time class="insight-date" datetime="${escapeHtml(item.date)}">${new Date(item.date).toLocaleDateString(state.lang === 'fr' ? 'fr-BE' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</time><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary)}</p><span class="insight-category">${escapeHtml(item.category)} · ${item.language === 'fr' ? 'Article en français' : 'Article in English'}</span></div><a class="insight-link" href="${safeHref(item.sourceUrl, ['www.lexentia.eu'])}" target="_blank" rel="noopener">${state.lang === 'fr' ? 'Lire l’article' : 'Read article'} ↗</a></article>`).join(''); $('#insights-empty').hidden = records.length > 0; }
+function caseRecords() { return state.cases.slice().sort((a, b) => String(b.judgmentDate || '').localeCompare(String(a.judgmentDate || ''))).slice(0, 5); }
+function caseDate(value) { return value ? new Date(value).toLocaleDateString(state.lang === 'fr' ? 'fr-BE' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : t('cases.noDate'); }
+function caseArrow() { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'M5 12h14m-6-6 6 6-6 6'); svg.append(path); return svg; }
 function renderCases() {
-  const list = $('#cases-list'); if (!list) return; const records = filterRecords(state.cases, { query: $('#case-search')?.value, court: $('#case-court')?.value }); const visible = records.slice().sort((a, b) => String(b.judgmentDate || '').localeCompare(String(a.judgmentDate || ''))).slice(0, 5); const courtName = (court) => court === 'Court of Justice' ? t('courts.cj') : t('courts.gc');
-  $('#case-retrieved').textContent = state.retrievedAt ? `${t('snapshot.label')} · ${new Date(state.retrievedAt).toLocaleDateString(state.lang === 'fr' ? 'fr-BE' : 'en-GB', { day:'2-digit', month:'short', year:'numeric' })}` : '';
-    list.innerHTML = visible.map((item) => `<article class="case-item"><span class="case-court">${escapeHtml(courtName(item.court))}</span><span class="case-number">${escapeHtml(item.caseNumber)}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary)}</p></div><div class="case-date">${item.judgmentDate ? new Date(item.judgmentDate).toLocaleDateString(state.lang === 'fr' ? 'fr-BE' : 'en-GB', { day:'2-digit', month:'short', year:'numeric' }) : t('cases.noDate')}<a href="${escapeHtml(item.officialUrl)}" target="_blank" rel="noopener">EUR-Lex ↗</a></div></article>`).join(''); const source = $('#case-source'); if (source) { source.replaceChildren(); const href = safeCaseListingHref(state.caseListingUrl); if (href !== '#') { const link = document.createElement('a'); link.href = href; link.target = '_blank'; link.rel = 'noopener'; link.className = 'text-link dark'; link.textContent = t('cases.source'); source.append(link); } } $('#cases-empty').hidden = records.length > 0; }
-function populateFilters() { const select = $('#insight-category'); uniqueValues(state.insights, 'category').sort().forEach((value) => { const option = document.createElement('option'); option.value = value; option.textContent = value; select.append(option); }); }
+  const track = $('#cases-list'); if (!track) return;
+  const records = caseRecords(); if (!records.length) { track.replaceChildren(); return; }
+  state.caseIndex = Math.max(0, Math.min(records.length - 1, state.caseIndex));
+  state.caseRailIndex = Math.max(0, Math.min(records.length, state.caseRailIndex));
+  if (track.children.length !== records.length + 1) {
+    track.replaceChildren(...records.map((item, index) => {
+      const slide = document.createElement('article'); slide.className = 'case-slide'; slide.setAttribute('role', 'group'); slide.setAttribute('aria-roledescription', 'slide'); slide.dataset.caseIndex = index;
+      const meta = document.createElement('span'); meta.className = 'case-slide-meta'; slide.append(meta);
+      const content = document.createElement('div'); content.className = 'case-slide-content';
+      const title = document.createElement('h3'); content.append(title);
+      const summary = document.createElement('p'); content.append(summary);
+      const court = document.createElement('span'); court.className = 'case-slide-court'; content.append(court);
+      const link = document.createElement('a'); link.className = 'case-explore'; link.target = '_blank'; link.rel = 'noopener'; link.append(document.createTextNode(t('cases.explore')), caseArrow()); content.append(link);
+      slide.append(content); return slide;
+    }).concat((() => { const clone = document.createElement('article'); clone.className = 'case-slide is-clone'; clone.setAttribute('role', 'presentation'); clone.setAttribute('aria-hidden', 'true'); clone.inert = true; clone.dataset.caseIndex = '0'; const meta = document.createElement('span'); meta.className = 'case-slide-meta'; clone.append(meta); const content = document.createElement('div'); content.className = 'case-slide-content'; const title = document.createElement('h3'); content.append(title); const summary = document.createElement('p'); content.append(summary); const court = document.createElement('span'); court.className = 'case-slide-court'; content.append(court); const link = document.createElement('a'); link.className = 'case-explore'; link.tabIndex = -1; link.target = '_blank'; link.rel = 'noopener'; link.append(document.createTextNode(t('cases.explore')), caseArrow()); content.append(link); clone.append(content); return [clone]; })()));
+  }
+  [...track.children].forEach((slide, index) => {
+    const recordIndex = index === records.length ? 0 : index; const item = records[recordIndex]; const active = index === state.caseRailIndex; const clone = index === records.length;
+    slide.classList.toggle('is-active', active); slide.classList.toggle('is-clone', clone); slide.setAttribute('aria-hidden', String(clone || !active)); slide.inert = clone || !active; slide.setAttribute('aria-label', clone ? '' : (recordIndex + 1) + ' / ' + records.length);
+    slide.querySelector('.case-slide-meta').textContent = item.caseNumber + ' · ' + caseDate(item.judgmentDate);
+    slide.querySelector('h3').textContent = item.title;
+    slide.querySelector('p').textContent = item.summary;
+    slide.querySelector('.case-slide-court').textContent = item.court === 'Court of Justice' ? t('courts.cj') : t('courts.gc');
+    const link = slide.querySelector('.case-explore'); link.href = item.officialUrl; link.firstChild.textContent = t('cases.explore');
+  });
+  track.style.setProperty('--case-shift', `calc(${state.caseRailIndex} * -100% - ${state.caseRailIndex} * 24px)`);
+  $('#case-index').textContent = String(state.caseIndex + 1); $('#case-total').textContent = String(records.length);
+  $('#case-retrieved').textContent = state.retrievedAt ? `${t('snapshot.label')}: ${new Date(state.retrievedAt).toLocaleDateString(state.lang === 'fr' ? 'fr-BE' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}` : '';
+  const source = $('#case-source'); const href = safeCaseListingHref(state.caseListingUrl);
+  if (source) { source.hidden = href === '#'; if (href !== '#') { source.href = href; source.replaceChildren(document.createTextNode(t('cases.source')), caseArrow()); } }
+  $('[data-case-carousel="prev"]')?.toggleAttribute('disabled', state.caseIndex === 0); $('[data-case-carousel="next"]')?.toggleAttribute('disabled', state.caseIndex === records.length - 1);
+}
+function stopCaseTimer() { if (state.caseTimer) { window.clearInterval(state.caseTimer); state.caseTimer = null; } }
+function caseAutoplayShouldRun() { const carousel = $('.cases-carousel'); return Boolean(carousel && shouldAutoplay({ manualPause: state.caseAutoplayPaused, documentHidden: document.hidden, reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches, hovering: carousel.matches(':hover'), focusWithin: carousel.matches(':focus-within') })); }
+function syncCaseTimer() { stopCaseTimer(); if (caseAutoplayShouldRun()) state.caseTimer = window.setInterval(() => selectCase(state.caseIndex + 1, { autoplay: true, resetTimer: false }), 5000); }
+function selectCase(index, { focus = false, autoplay = false, resetTimer = true } = {}) {
+  const total = caseRecords().length; if (!total) return;
+  if (state.caseResetTimer) { window.clearTimeout(state.caseResetTimer); state.caseResetTimer = null; }
+  if (!autoplay) { const status = $('.case-status'); status?.setAttribute('aria-live', 'polite'); }
+  if (autoplay && state.caseIndex === total - 1) {
+    state.caseIndex = 0; state.caseRailIndex = total; renderCases();
+    state.caseResetTimer = window.setTimeout(() => {
+      const track = $('#cases-list'); if (!track) return;
+      track.classList.add('is-resetting'); state.caseRailIndex = state.caseIndex; renderCases(); void track.offsetWidth;
+      requestAnimationFrame(() => { track.classList.remove('is-resetting'); state.caseResetTimer = null; });
+    }, 920);
+  } else {
+    state.caseIndex = autoplay ? nextCarouselIndex(state.caseIndex, total, 1, true) : nextCarouselIndex(index, total, 0, false); state.caseRailIndex = state.caseIndex; renderCases();
+  }
+  if (!autoplay) { window.setTimeout(() => $('.case-status')?.setAttribute('aria-live', 'off'), 1000); }
+  if (focus) $('[data-case-carousel="next"]')?.focus(); if (resetTimer) syncCaseTimer();
+}
+function setupCaseAutoplay() { const carousel = $('.cases-carousel'); const toggle = $('.case-autoplay'); if (!carousel || !toggle) return; const sync = () => syncCaseTimer(); carousel.addEventListener('mouseenter', sync); carousel.addEventListener('mouseleave', sync); carousel.addEventListener('focusin', sync); carousel.addEventListener('focusout', sync); document.addEventListener('visibilitychange', sync); const motion = window.matchMedia('(prefers-reduced-motion: reduce)'); motion.addEventListener?.('change', sync); toggle.addEventListener('click', () => { state.caseAutoplayPaused = !state.caseAutoplayPaused; toggle.classList.toggle('is-paused', state.caseAutoplayPaused); toggle.setAttribute('aria-pressed', String(state.caseAutoplayPaused)); toggle.setAttribute('aria-label', state.caseAutoplayPaused ? t('carousel.casePlay') : t('carousel.casePause')); sync(); }); sync(); }function populateFilters() { const select = $('#insight-category'); uniqueValues(state.insights, 'category').sort().forEach((value) => { const option = document.createElement('option'); option.value = value; option.textContent = value; select.append(option); }); }
 function setupHeroSequence() {
   const sequence = $('.hero-sequence'); const stage = $('.hero-stage'); if (!sequence || !stage) return;
   let frame = 0;
@@ -120,12 +195,14 @@ function setupEvents() {
   $$('[data-lang]').forEach((button) => button.addEventListener('click', () => { state.lang = button.dataset.lang; updateLanguage(); }));
   $$('[data-carousel]').forEach((button) => button.addEventListener('click', () => selectPractice(state.practiceIndex + (button.dataset.carousel === 'next' ? 1 : -1))));
   $('#insight-search').addEventListener('input', renderInsights); $('#insight-category').addEventListener('change', renderInsights); $('#insight-reset').addEventListener('click', () => { $('#insight-search').value = ''; $('#insight-category').value = ''; renderInsights(); });
-  $('#case-search').addEventListener('input', renderCases); $('#case-court').addEventListener('change', renderCases); $('#case-reset').addEventListener('click', () => { $('#case-search').value = ''; $('#case-court').value = ''; renderCases(); });
+  $$('[data-case-carousel]').forEach((button) => button.addEventListener('click', () => selectCase(state.caseIndex + (button.dataset.caseCarousel === 'next' ? 1 : -1))));
   const menu = $('.menu-button'); const panel = $('#mobile-menu'); menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; menu.setAttribute('aria-expanded', String(!open)); panel.hidden = open; document.body.classList.toggle('menu-open', !open); }); $$('#mobile-menu a').forEach((link) => link.addEventListener('click', () => { panel.hidden = true; menu.setAttribute('aria-expanded', 'false'); document.body.classList.remove('menu-open'); }));
   const media = $('.media-control'); const video = $('#hero-video'); if (video && media) { const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; const setVideoLabel = (paused) => { media.setAttribute('aria-label', paused ? t('hero.play') : t('hero.pause')); media.setAttribute('aria-pressed', String(paused)); media.classList.toggle('is-paused', paused); }; video.addEventListener('error', () => { video.style.display = 'none'; if (video.nextElementSibling) video.nextElementSibling.style.display = 'block'; media.hidden = true; }); if (reduced) { video.pause(); video.preload = 'none'; video.querySelectorAll('source').forEach((source) => source.remove()); media.hidden = true; } else { video.play().catch(() => { media.hidden = true; }); } media.addEventListener('click', () => { if (video.paused) video.play().then(() => setVideoLabel(false)).catch(() => { media.hidden = true; }); else { video.pause(); setVideoLabel(true); } }); video.addEventListener('play', () => setVideoLabel(false)); video.addEventListener('pause', () => setVideoLabel(true)); setVideoLabel(false); }
   setupHeroSequence();
   setupPracticeAutoplay();
+  setupCaseAutoplay();
   setupReveals();
+  window.addEventListener('resize', positionPracticeTrack);
   setupContactForm();
 }
 async function init() {
